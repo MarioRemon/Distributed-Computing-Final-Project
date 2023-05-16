@@ -2,7 +2,7 @@ import pygame
 
 
 class Player():
-    def __init__(self, id, userName, x, y, width, height, color, rank, mapComplete):
+    def __init__(self, id, userName, x, y, width, height, color, rank, mapComplete, score):
         self.id = id
         self.x = x
         self.y = y
@@ -15,6 +15,7 @@ class Player():
         self.userName = userName
         self.mapComplete = mapComplete
         self.active = True
+        self.score = score
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, self.rect)

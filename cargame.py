@@ -11,6 +11,13 @@ from obstacles import Tree
 from obstacles import Pr
 from obstacles import Raindrop
 from obstacles import FinishLine
+import random
+from time import sleep
+from network import Network
+from player import Player
+import re
+from gameNetwork import GameNetwork
+
 # from MainMenu import MainMenu
 
 #define colours
@@ -25,6 +32,15 @@ FPS = 10
 
 
 class CarRacing:
+    n = GameNetwork()
+    net = n.startTheGame()
+    network = net[0]
+    # n = Network()
+    # network = Network(n[0])  # initliazed connection to server
+    numberOfPlayerCars = network.getNumberOfPlayers()
+    otherPlayersCars = []
+    mario = 0
+
     def __init__(self):
 
         pygame.init()
@@ -41,9 +57,12 @@ class CarRacing:
         self.grey = (211, 211, 211)
         self.clock = pygame.time.Clock()
         self.gameDisplay = None
-
         self.font = pygame.font.Font(None, 64)
-
+        self.carImages = ['Img/car.png', 'Img/car1.png', 'Img/pickup_truck.png', 'Img/semi_trailer.png', 'Img/taxi.png',
+                          'Img/van.png', 'Img/cars/1.png', 'Img/cars/2.png', 'Img/cars/3.png', 'Img/cars/4.png', 'Img/cars/5.png', 'Img/cars/6.png', 'Img/cars/7.png', 'Img/cars/8.png']
+        self.carXCoordinates = [self.display_width * 0.47, (self.display_width * 0.47) - 80,
+                                (self.display_width * 0.47) + 80]
+        self.currentRoad = 0
         self.initialize()
 
     def initialize(self):
@@ -51,10 +70,10 @@ class CarRacing:
 
         self.crashed = False
 
-        self.carImg = pygame.image.load('Img/cars/1.png')
-        self.carImg = pygame.transform.scale(self.carImg, (80,120))
-        self.car_x_coordinate = 300
-        self.car_y_coordinate = 550
+        self.carImg = pygame.image.load(self.carImages[self.network.getMyNumberId])
+        self.carImg = pygame.transform.scale(self.carImg, (80, 120))
+        self.car_x_coordinate = self.carXCoordinates[self.network.getMyNumberId]  # (self.display_width * 0.47)
+        self.car_y_coordinate = (self.display_height * 0.8)
         self.car_width = 49
         self.car_rect = self.carImg.get_rect()
         self.car_rect.y = 0
@@ -74,8 +93,9 @@ class CarRacing:
         self.bg_x2 = (self.display_width / 2) - (800 / 2)
         self.bg_y1 = 0
         self.bg_y2 = -600
-        self.bg_speed = 10
+        self.bg_speed = 3
         self.count = 0
+        self.Counter = 0
 
         self.tree_group = pygame.sprite.Group()
         self.Pr_group = pygame.sprite.Group()
@@ -96,10 +116,11 @@ class CarRacing:
     def get_font(self, size):  # Returns Press-Start-2P in the desired size
         return pygame.font.Font("Img/font.ttf", size)
 
-    def racing_window(self):
+    def racing_window(self, playerName):
         self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption('Super Racing Car')
-        self.main_menu()
+        self.run_car(playerName)
+        #self.main_menu()
         # self.run_car(playerName)
 
     def display_message(self, msg):
@@ -181,7 +202,10 @@ class CarRacing:
         self.gameDisplay.blit(self.gardenBrown, (0, 0))
         self.gameDisplay.blit(self.bgImg, (self.bg_x1 + 120, self.bg_y1))
         self.gameDisplay.blit(self.bgImg, (self.bg_x2 + 120, self.bg_y2))
-
+        self.currentRoad = (self.currentRoad + 1)
+        self.currentRoad1 = self.currentRoad / 400
+        self.totalMap = 20
+        self.mapCompleted = (self.currentRoad1 / self.totalMap) * 100
         self.bg_y1 += self.bg_speed
         self.bg_y2 += self.bg_speed
 
@@ -199,7 +223,7 @@ class CarRacing:
 
     def mapCompletePerecentage(self, percent):
         font = pygame.font.SysFont("arial", 20)
-        text = font.render("Complete : " + str(percent), True, self.white)
+        text = font.render("Complete : " + str(int(percent)) + '%', True, self.white)
         self.gameDisplay.blit(text, (0, 20))
 
     def playersNumber(self, number):
@@ -212,84 +236,25 @@ class CarRacing:
         text = font.render("Score : " + str(count), True, self.white)
         self.gameDisplay.blit(text, (0, 60))
 
-    # def rankers(self, rankers):
-    #     font = pygame.font.SysFont("arial", 20)
-    #     text = font.render(str(rankers[0]), True, self.white)
-    #     self.gameDisplay.blit(text, (0, 80))
-    #     text = font.render(str(rankers[1]), True, self.white)
-    #     self.gameDisplay.blit(text, (0, 100))
-    #     text = font.render(str(rankers[2]), True, self.white)
-    #     self.gameDisplay.blit(text, (0, 120))
+    def rankers(self, rankers):
+        font = pygame.font.SysFont("arial", 20)
+        text = font.render(str(rankers[0]), True, self.white)
+        self.gameDisplay.blit(text, (0, 80))
+        #text = font.render(str(rankers[1]), True, self.white)
+        #self.gameDisplay.blit(text, (0, 100))
+        #text = font.render(str(rankers[2]), True, self.white)
+        #self.gameDisplay.blit(text, (0, 120))
 
     def display_credit(self):
         font = pygame.font.SysFont("lucidaconsole", 14)
         text = font.render("Thanks for playing!", True, self.white)
         self.gameDisplay.blit(text, (600, 520))
 
-    def main_menu(self):
 
-        while not self.crashed:
-
-            self.gameDisplay.blit(self.BG, (0, 0))
-
-            MENU_MOUSE_POS = pygame.mouse.get_pos()
-
-            MENU_TEXT = self.get_font(50).render("MAIN MENU", True, white)
-            MENU_RECT = MENU_TEXT.get_rect(center=(400, 150))
-            # Create the mute/unmute button
-            self.speaker_image = pygame.image.load('Img/unmute.png')
-            self.speaker_image = pygame.transform.scale(self.speaker_image, (170,170))
-            self.speaker_muted_image = pygame.image.load('Img/mute.png')
-            self.speaker_muted_image = pygame.transform.scale(self.speaker_muted_image, (170,170))
-
-            speaker_button = Button(
-                image=self.speaker_image,
-                pos=(80, 80),
-                text_input="",
-                font=pygame.font.Font(None, 24),
-                base_color="#d7fcd4", hovering_color="White"
-            )
-
-            PLAY_BUTTON = Button(image=pygame.image.load("Img/Options Rect.png"), pos=(150, 580),
-                                 text_input="PLAY", font=self.get_font(30), base_color="#d7fcd4", hovering_color="White")
-            OPTIONS_BUTTON = Button(image=pygame.image.load("Img/Options Rect.png"), pos=(400, 580),
-                                    text_input="OPTIONS", font=self.get_font(30), base_color="#d7fcd4",
-                                    hovering_color="White")
-            QUIT_BUTTON = Button(image=pygame.image.load("Img/Options Rect.png"), pos=(650, 580),
-                                 text_input="QUIT", font=self.get_font(30), base_color="#d7fcd4", hovering_color="White")
-
-            self.gameDisplay.blit(MENU_TEXT, MENU_RECT)
-            self.music_paused = False
-            for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON,speaker_button]:
-                button.changeColor(MENU_MOUSE_POS)
-                button.update(self.gameDisplay)
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if speaker_button.checkForInput(pygame.mouse.get_pos()):
-                        if self.music_paused:
-                            pygame.mixer.music.unpause()  # Unpause music
-                            self.music_paused = False
-                            speaker_button.image = self.speaker_image
-                        else:
-                            pygame.mixer.music.pause()  # Pause music
-                            self.music_paused = True
-                            speaker_button.image = self.speaker_muted_image
-                    speaker_button.update(self.gameDisplay)
-                    pygame.display.update()
-
-                    if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        #self.run_car(self.playerName)
-                        self.countdown()
-                    # if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    #     #options()
-                    if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        pygame.quit()
-                        sys.exit()
-            pygame.display.update()
+    def run_other_players_car(self, playerId, xCoordinate, yCoordinate):
+        playerCar = pygame.image.load(self.carImages[playerId])
+        pygame.transform.scale(playerCar, (50, 100))
+        self.gameDisplay.blit(playerCar, (xCoordinate, yCoordinate))
 
     # Game over screen function
 
@@ -312,35 +277,31 @@ class CarRacing:
         pygame.display.flip()
 
     # Function to retrieve high scores from the server
-    def get_high_scores_from_server(self):
-        # Connect to the server
-        host = 'your_server_address'
-        port = 12345
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((host, port))
-
-        # Send request for high scores
-        client_socket.sendall(b"GET_HIGH_SCORES")
-
-        # Receive high scores from the server
-        high_scores_data = client_socket.recv(1024).decode()
-
-        # Close the connection
-        client_socket.close()
-
-        # Parse and return the high scores data
-        high_scores = high_scores_data.split(",")
-        return high_scores
+    # def get_high_scores_from_server(self):
+    #     # Connect to the server
+    #     host = 'your_server_address'
+    #     port = 12345
+    #     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #     client_socket.connect((host, port))
+    #
+    #     # Send request for high scores
+    #     client_socket.sendall(b"GET_HIGH_SCORES")
+    #
+    #     # Receive high scores from the server
+    #     high_scores_data = client_socket.recv(1024).decode()
+    #
+    #     # Close the connection
+    #     client_socket.close()
+    #
+    #     # Parse and return the high scores data
+    #     high_scores = high_scores_data.split(",")
+    #     return high_scores
 
     #gameloop
-    def run_car(self,playerName):
+    def run_car(self, playerName):
 
-        network = Network()  # initliazed connection to server
-        # mafrod a receive ana rkm kam mn el network w ahotha fi class el player
-
-        player = Player(network.getId(), playerName, self.car_x_coordinate, self.car_y_coordinate, self.car_width,
-                        100, 'Blue', 0, 0)
-        print(player.mapComplete)
+        player = Player(self.network.getId(), playerName, self.car_x_coordinate, self.car_y_coordinate, self.car_width,
+                        100, 'Blue', 0, 0, 0)
 
         # Load the music file
         pygame.mixer.music.load('Img/My_Life_Be_Like.mp3')
@@ -350,6 +311,7 @@ class CarRacing:
 
 
         while not self.crashed:
+            print("blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaack")
             #for switch
             self.gameDisplay.fill("black")
             self.gameDisplay.blit(self.gardenBrown, (0, 0))
@@ -358,8 +320,8 @@ class CarRacing:
                 if event.type == pygame.QUIT:
                     self.crashed = True
 
-
                 if (event.type == pygame.KEYDOWN):
+                    print("zoraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar")
                     # Check if the mute button was clicked
                     if event.key == pygame.K_r:
                         self.is_raining = not self.is_raining
@@ -388,18 +350,33 @@ class CarRacing:
 
                         #send("x position for car here")
                         print ("CAR X COORDINATES: %s" % self.car_x_coordinate)
-                    print ("x: {x}, y: {y}".format(x=self.car_x_coordinate, y=self.car_y_coordinate))
+                    print("x: {x}, y: {y}".format(x=self.car_x_coordinate, y=self.car_y_coordinate))
                     #network.send((self.car_x_coordinate, self.car_y_coordinate))
-                    if(event.key == pygame.K_UP and self.bg_speed < 15.0):
+                    if (event.key == pygame.K_UP and self.bg_speed < 15.0):
                         self.bg_speed = self.bg_speed + 0.15
-                        print('increase')
-                        print(self.bg_speed)
-
-                    if(event.key == pygame.K_DOWN and self.bg_speed > 2.0):
+                    if (event.key == pygame.K_DOWN and self.bg_speed > 2.0):
                         self.bg_speed -= 0.15
-                        print('decrease bmzagy')
+                elif (self.bg_speed > 2.0):
+                    self.bg_speed -= 0.0000015
+
             self.gameDisplay.fill(self.black)
             self.back_ground_raod()
+
+            self.mario = self.network.getUpdateMapComplete(self.mapCompleted, self.count)
+            # print('maaaaaaaaaaaaaaario')
+            # print(mario)
+            # print((mario[0]))
+            # print((float(mario[0][0][1]) * self.totalMap / 100) - self.currentRoad1)
+            myPos = self.car_x_coordinate, self.car_y_coordinate
+            for otherPlayersCars in self.network.getOtherPlayersPos(myPos):
+                print(otherPlayersCars[0][0])
+                #if ((otherPlayersCars[0][0] != int(self.network.getMyNumberId)) and abs(
+                #        (float(mario[otherPlayersCars[0][0]][0][1]) * self.totalMap / 100) - self.currentRoad1) < 2):
+                #    coordinates = re.split(r'[(|,| |)]', otherPlayersCars[0][1])
+                #    print(coordinates[1])
+                #    print(coordinates[3])
+                #    y = re.findall(r'\d+\.\d+', coordinates[3])
+                #    self.run_other_players_car(otherPlayersCars[0][0], float(coordinates[1]), float(coordinates[3]))
             # Update and render main menu
            # self.main_menu.main_menu()
 
@@ -435,30 +412,30 @@ class CarRacing:
 
 
             #trees
-            self.count += 1
-            if self.count % 20 == 0:
+            self.Counter += 1
+            if self.Counter % 20 == 0:
                 self.tree = Tree(random.choice([-5, self.display_width - 35]), -70)
                 self.tree_group.add(self.tree)
             self.tree_group.update(self.bg_speed)
             self.tree_group.draw(self.gameDisplay)
 
-            self.count += 1
-            if self.count % 20 == 0:
+            self.Counter += 1
+            if self.Counter % 20 == 0:
                 self.tree = Tree(random.choice([-5, self.display_width - 35]), -70)
                 self.tree_group.add(self.tree)
             self.tree_group.update(self.bg_speed)
             self.tree_group.draw(self.gameDisplay)
 
              #obstacles
-            if self.count % 45 == 0:
-                self.obs = random.choices([1,2,3],weights=[6,2,2],k=1) [0]
+            if self.Counter % 60 == 0:
+                self.obs = random.choices([1, 2, 3], weights=[6, 2, 2], k=1)[0]
                 self.obee = Pr(self.obs)
                 self.Pr_group.add(self.obee)
             self.Pr_group.update(self.bg_speed)
             self.Pr_group.draw(self.gameDisplay)
 
             #finish line
-            if self.count >= 1600:
+            if int(self.mario) >= 100:
                 self.finish_line.draw()
                 self.crashed = True
 
@@ -466,16 +443,13 @@ class CarRacing:
                 self.display_message("Game Over !!!")
                 pygame.display.update()
 
-            network.getUpdateMapComplete('20')
-            print(player.mapComplete)
-            #print(network.getOtherPlayersPos((self.car_x_coordinate, self.car_y_coordinate)))
             self.car(self.car_x_coordinate, self.car_y_coordinate)
             self.playerName(playerName)
-            self.mapCompletePerecentage(player.id)
-            self.playersNumber(network.getNumberOfPlayers())
+            self.mapCompletePerecentage(self.mapCompleted)
+            self.playersNumber(self.network.getNumberOfPlayers())
             self.highscore(self.count)
-        #    self.rankers(network.getGameRankers())
-
+            self.rankers(self.network.getGameRankers())
+            self.count = self.count + int((self.bg_speed / 2))
 
             if self.car_x_coordinate < 150 or self.car_x_coordinate > 550:
                 self.crashed = True
