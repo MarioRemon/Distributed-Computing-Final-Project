@@ -3,7 +3,7 @@ from _thread import *
 from player import Player
 import pickle
 
-server = "197.161.172.38"
+server = "10.1.0.210"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,6 +21,20 @@ print("Waiting for a connection, Server Started")
 players = []
 numOfPlayers = 0
 rankers = [][2]
+
+# # Function to send car position update to the server
+# def send_position_update(position):
+#     update = pickle.dumps(position)  # Serialize the position data
+#     client_socket.sendall(update)
+#
+# # Continuously update the car position and send updates to the server
+# while True:
+#     # Update the car position (replace this with your own logic)
+#     car_position = (x, y)  # Example position data
+#
+#     # Send the position update to the server
+#     send_position_update(car_position)
+
 def threaded_client(conn, playerId):
     player = Player(playerId, '', 0, 0, 0, 0, 0, len(players), 0)
     rankers.append([playerId, 0])

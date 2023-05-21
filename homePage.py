@@ -1,4 +1,4 @@
-from tkinter import *
+from Tgroba import *
 from cargame import CarRacing
 from MuteButton import MuteButton
 import pygame
@@ -56,6 +56,7 @@ class HomePage:
             for button in [PLAY_BUTTON, self.OPTIONS_BUTTON, self.QUIT_BUTTON]:
                 button.changeColor(MENU_MOUSE_POS)
                 button.update(self.gameDisplay)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.crashed = True
@@ -64,6 +65,8 @@ class HomePage:
                     MUTE_BUTTON.handle_event(event)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        # car.draw_chat_box()
+                        # car.draw_input_box()
                         car.countdown()
                     if self.QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                         pygame.quit()
