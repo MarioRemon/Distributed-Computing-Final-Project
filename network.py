@@ -9,7 +9,7 @@ class Network:
     def __init__(self, port):
         print("init")
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "10.1.0.110"
+        self.server = "192.168.1.81"
         self.port = port
         self.addr = (self.server, self.port)
         self.id = self.connect()
@@ -66,6 +66,7 @@ class Network:
         try:
             self.client.send(pickle.dumps('2:' + str(mapComplete) + ':' + str(score)))  # + str(Pos)))
             # print( pickle.loads(self.client.recv(2048)))
+            #print(pickle.loads(self.client.recv(2048)))
             return pickle.loads(self.client.recv(2048))
             # self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
             # return self.client.recv(2048).decode()
@@ -79,6 +80,14 @@ class Network:
             return pickle.loads(self.client.recv(2048 * 16))
             # self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
             # return self.client.recv(2048).decode()
+        except socket.error as e:
+            print("error")
+            print(e)
+
+    def sendPlayerName(self, playerName):
+        try:
+            self.client.send(pickle.dumps('5:' + str(playerName)))
+            #return pickle.loads(self.client.recv(2048 * 16))
         except socket.error as e:
             print("error")
             print(e)

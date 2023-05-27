@@ -4,7 +4,7 @@ from MuteButton import MuteButton
 import pygame
 from button import Button
 import sys
-
+from gameNetwork import GameNetwork
 
 #define colours
 bg = (204, 102, 0)
@@ -64,7 +64,10 @@ class HomePage:
                     MUTE_BUTTON.handle_event(event)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        car.countdown()
+                        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                        print(self.username)
+                        car.countdown(self.username)
+
                     if self.QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                         pygame.quit()
                         sys.exit()
@@ -87,6 +90,7 @@ class HomePage:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN and self.textbox_rect.collidepoint(MENU_MOUSE_POS):
                         print(self.username)
+
                         pygame.key.stop_text_input()
                     elif event.key == pygame.K_BACKSPACE:
                         self.username = self.username[:-1]
@@ -97,7 +101,7 @@ class HomePage:
 
             # Draw the text box
             pygame.draw.rect(self.gameDisplay, (0, 0, 0), (300, 200, 200, 30), 2)
-            self.textbox_surface = self.font.render(self.username, True, (0, 0, 0))
+            self.textbox_surface = self.font.render(self.username, True, white)
             self.gameDisplay.blit(self.textbox_surface, (self.textbox_rect.x + 5, self.textbox_rect.y + 5))
 
 

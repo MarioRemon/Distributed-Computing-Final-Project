@@ -1,17 +1,14 @@
 import socket
 from _thread import *
-
-import mongo as mongo
-
 from player import Player
 import pymongo
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-import time
+
 import pickle
 
 server = "192.168.1.81"
-port = 5555
+port = 9999
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -24,16 +21,14 @@ s.listen()
 print("Waiting for a connection, Server Started")
 
 uri = "mongodb+srv://Mario:123@cluster0.msy4ut4.mongodb.net/?retryWrites=true&w=majority"
-#Create a new client and connect to the server
+# Create a new client and connect to the server
 client = MongoClient(uri, server_api=ServerApi('1'))
-#Send a ping to confirm a successful connection
+# Send a ping to confirm a successful connection
 try:
-   client.admin.command('ping')
-   print("Pinged your deployment. You successfully connected to MongoDB!")
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
 except Exception as e:
-   print(e)
-
-
+    print(e)
 #players = [Player(0,0,50,50,(255,0,0)), Player(100,100, 50,50, (0,0,255))]
 players = []
 numOfPlayers = 0
@@ -45,6 +40,20 @@ first3Rankers = []
 playersName = []
 def threaded_client(conn, playerId):
     player = Player(playerId, '', 0, 0, 0, 0, 0, len(players), 0, 0)
+    mydb = client['Car_Racing_Car']
+    data = mydb.players
+    record = {
+        'id': player.id,
+        'userName': player.userName,
+        'x_coordinate': player.x,
+        'y_coordinate': player.y,
+        'mapComplete': player.mapComplete,
+        'active': player.active,
+        'score': player.score,
+    }
+    data.insert_one(record)
+
+
     newPos = [[playerId, '(0, 0)']]
     mapScore = [[playerId, 1, 2]]
     rankPlayers.append(mapScore)
@@ -58,55 +67,6 @@ def threaded_client(conn, playerId):
     conn.send(pickle.dumps(players[playerId]))
     reply = ""
     reply1 = []
-
-
-    try:
-        mydb = client['Car_Racing_Car']
-        print('1')
-        data = mydb.game
-        print('2')
-        lastGame = mydb.game.find().sort([('time', -1)]).limit(1)
-        print('3')
-        if int(lastGame.next()['server']) == 2:# and int(lastGame.next()['numberOfPlayers']) <= 8:
-            print('5555555555555')
-            myquery = {'GameId': lastGame.next()['GameId']}
-            record = {
-                'numberofPlayers': 10,#numOfPlayers,
-                # '$push': {
-                #     'players': {
-                #         'id': player.id,
-                #         'userName': player.userName,
-                #         'x_coordinate': player.x,
-                #         'y_coordinate': player.y,
-                #         'mapComplete': player.mapComplete,
-                #         'active': player.active,
-                #         'score': player.score,
-                # }
-                # }
-            }
-            data.update_many(myquery, record)
-
-        print('4')
-        # record = {
-        #     'GameId': '',
-        #     'server': 2,
-        #     'time': time.ctime(),
-        #     'numberOfPlayers': numOfPlayers,
-        #     'players': [{
-        #         'id': player.id,
-        #         'userName': player.userName,
-        #         'x_coordinate': player.x,
-        #         'y_coordinate': player.y,
-        #         'mapComplete': player.mapComplete,
-        #         'active': player.active,
-        #         'score': player.score,
-        #     }]
-        # }
-        #data.insert_one(record)
-    except:
-        print('error')
-
-
     while True:
         try:
             data = pickle.loads(conn.recv(2048))
@@ -123,15 +83,14 @@ def threaded_client(conn, playerId):
                     conn.sendall(pickle.dumps(numOfPlayers))
                     print(len(players))
                 elif clientRequest[0] == '1':
-                    # rankPlayers.sort(key=lambda x: [1], reverse=True)
-                    # first3Rankers.clear()
-                    # for i in rankPlayers:
-                    #     first3Rankers.append(i[0][0])
-                    # newList = []
-                    # for x in first3Rankers:
-                    #     newList.append(playersName[x])
-                    #     conn.send(pickle.dumps(newList))
-                    conn.send(pickle.dumps('1'))
+                    rankPlayers.sort(key=lambda x: [1], reverse=True)
+                    first3Rankers.clear()
+                    for i in rankPlayers:
+                        first3Rankers.append(i[0][0])
+                    newList = []
+                    for x in first3Rankers:
+                        newList.append(playersName[x])
+                        conn.send(pickle.dumps(newList))
                 elif clientRequest[0] == '2':
                         player.mapComplete = clientRequest[1]
                         player.score = clientRequest[2]
