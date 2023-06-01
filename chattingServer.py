@@ -1,7 +1,7 @@
 import socket
 import threading
 
-IP = '192.168.1.81'
+IP = '192.168.1.11'
 PORT = 4444
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

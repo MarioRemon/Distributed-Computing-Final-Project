@@ -10,7 +10,7 @@ from pymongo.server_api import ServerApi
 import time
 import pickle
 
-server = "192.168.1.81"
+server = "192.168.1.11"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,12 +66,13 @@ def threaded_client(conn, playerId):
         data = mydb.game
         print('2')
         lastGame = mydb.game.find().sort([('time', -1)]).limit(1)
-        print('3')
+        print('3333333333333333333333333333333')
         if int(lastGame.next()['server']) == 2:# and int(lastGame.next()['numberOfPlayers']) <= 8:
             print('5555555555555')
             myquery = {'GameId': lastGame.next()['GameId']}
-            record = {
-                'numberofPlayers': 10,#numOfPlayers,
+            print('6666666666666666666666666666666')
+            #record = {
+            #    'numberofPlayers': 10,#numOfPlayers,
                 # '$push': {
                 #     'players': {
                 #         'id': player.id,
@@ -83,8 +84,8 @@ def threaded_client(conn, playerId):
                 #         'score': player.score,
                 # }
                 # }
-            }
-            data.update_many(myquery, record)
+            #}
+            #data.update_many(myquery, record)
 
         print('4')
         # record = {

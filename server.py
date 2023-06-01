@@ -4,7 +4,7 @@ from player import Player
 
 import pickle
 
-server = "192.168.1.81"
+server = "192.168.1.11"
 port = 9090
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

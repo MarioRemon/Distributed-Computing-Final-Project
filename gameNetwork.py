@@ -7,7 +7,7 @@ from chat import Client
 class GameNetwork:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.1.10"
+        self.server = "192.168.1.11"
         self.port = 9090
         self.addr = (self.server, self.port)
         self.port1, self.port2 = self.connect()

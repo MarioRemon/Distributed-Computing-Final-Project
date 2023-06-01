@@ -7,7 +7,7 @@ from pymongo.server_api import ServerApi
 
 import pickle
 
-server = "192.168.1.81"
+server = "192.168.1.11"
 port = 9999
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

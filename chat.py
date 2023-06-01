@@ -12,7 +12,7 @@ class Client:
     oldUser = False
     def __init__(self,  port, userName):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = '192.168.1.81'
+        ip = '192.168.1.11'
         self.sock.connect((ip, port))
         msg = tkinter.Tk()
         msg.withdraw()
