@@ -3,8 +3,8 @@ from _thread import *
 from player import Player
 
 import pickle
-
-server = "192.168.1.11"
+from ip import *
+server = ip
 port = 9090
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,13 +22,10 @@ def threaded_client(conn):
     numberOfPlayers += 1
     #while True:
     try:
-        print(numberOfPlayers)
         if numberOfPlayers <= 8:
-            print('#################################')
             carServerPort = 5555
             challengeServerPort = 4444
         else:
-            print('------------------------------------------------')
             carServerPort = 9999
             challengeServerPort = 3333
         if numberOfPlayers == 16:

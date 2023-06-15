@@ -2,19 +2,19 @@ import socket
 import pickle
 from network import Network
 from chat import Client
+from ip import *
 
 
 class GameNetwork:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.1.11"
+        self.server = ip
         self.port = 9090
         self.addr = (self.server, self.port)
         self.port1, self.port2 = self.connect()
 
     def connect(self):
         try:
-            print("connect mariooooo")
             self.client.connect(self.addr)
             return pickle.loads(self.client.recv(2048))
         except:

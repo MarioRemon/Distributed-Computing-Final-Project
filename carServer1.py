@@ -4,10 +4,10 @@ from player import Player
 import pymongo
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-
 import pickle
+from ip import *
 
-server = "192.168.1.11"
+server = ip
 port = 9999
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

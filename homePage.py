@@ -10,8 +10,8 @@ from gameNetwork import GameNetwork
 bg = (204, 102, 0)
 red = (255, 0, 0)
 black = (0, 0, 0)
-white = (255,255,255)
-grey = (211,211,211)
+white = (255, 255, 255)
+grey = (211, 211, 211)
 
 
 car = CarRacing()
@@ -64,8 +64,6 @@ class HomePage:
                     MUTE_BUTTON.handle_event(event)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                        print(self.username)
                         car.countdown(self.username)
 
                     if self.QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):

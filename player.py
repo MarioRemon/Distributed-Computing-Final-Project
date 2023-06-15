@@ -2,14 +2,15 @@ import pygame
 
 
 class Player():
-    def __init__(self, id, userName, x, y, width, height, color, rank, mapComplete, score):
+    def __init__(self, id, userName, position, width, height, color, rank, mapComplete, score):
         self.id = id
-        self.x = x
-        self.y = y
+        #self.x = x
+        #self.y = y
+        self.position = position
         self.width = width
         self.height = height
         self.color = color
-        self.rect = (x, y, width, height)
+        #self.rect = (x, y, width, height)
         self.vel = 3
         self.rank = rank
         self.userName = userName

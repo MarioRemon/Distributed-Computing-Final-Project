@@ -2,17 +2,22 @@ import socket
 import threading
 import tkinter
 import tkinter.scrolledtext
+from ip import *
+import pickle
+
 from tkinter import simpledialog
 
-#IP = '10.1.0.110'
+IP = ip
 PORT = 4444
 
 
 class Client:
     oldUser = False
+    #message = ''
+    #count = 0
     def __init__(self,  port, userName):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = '192.168.1.11'
+        ip = IP
         self.sock.connect((ip, port))
         msg = tkinter.Tk()
         msg.withdraw()
@@ -31,11 +36,11 @@ class Client:
         self.win.configure(bg="purple")
         self.win.title('chatting')
 
-        self.chat_label = tkinter.Label(self.win, text="Chat:", bg="purple",fg="white")
+        self.chat_label = tkinter.Label(self.win, text="Chat:", bg="purple", fg="white")
         self.chat_label.config(font=("Arial", 16,))
         self.chat_label.pack(side=tkinter.TOP, anchor='w', pady =5)
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(self.win,width=20,height=10)
+        self.text_area = tkinter.scrolledtext.ScrolledText(self.win, width=20, height=10)
         self.text_area.pack(anchor='w', padx=5, pady=5)
         self.text_area.config(state='disabled')  # user not be able to add text to text area
 
@@ -43,7 +48,7 @@ class Client:
         # self.msg_label.config(font=("Arial", 12))
         # self.msg_label.pack(padx=20, pady=5)
 
-        self.input_area = tkinter.Text(self.win, width=10,height=3,bg="light yellow",wrap="word")
+        self.input_area = tkinter.Text(self.win, width=10, height=3, bg="light yellow", wrap="word")
         self.input_area.pack(padx=20, pady=5)
 
         self.send_button = tkinter.Button(self.win, text="Send", command=self.write)
@@ -57,8 +62,21 @@ class Client:
 
     def write(self):
         msg = f"{self.username}:{self.input_area.get('1.0', 'end')}"
-        self.sock.send(msg.encode('utf-8'))
+        # self.message += msg
+        self.sock.sendall(pickle.dumps(msg))#.encode('utf-8'))
         self.input_area.delete('1.0', 'end')
+
+        # if(self.count % 15):
+        #     count = 0
+        #     mydb = client['Car_Racing_Car']
+        #     data = mydb['game']
+        #     # data = mydb.game
+        #     lastGame = data.find().sort([('time', -1)]).limit(1)
+        #     last_game = lastGame.next()
+        #     recordUpdate = {
+        #         'chatOfTheGame': self.message
+        #     }
+        #     data.update_one({'GameId': last_game['GameId']}, {"$set": recordUpdate})
 
     def stop(self):
         self.running = False
@@ -69,12 +87,14 @@ class Client:
     def receive(self):
         while self.running:
             try:
-                msg = self.sock.recv(1024).decode('utf-8')
+                msg = pickle.loads(self.sock.recv(2048))
                 if msg == 'NICK':
-                    self.sock.send(self.username.encode('utf-8'))
+                    self.sock.sendall(pickle.dumps(self.username))#.encode('utf-8'))
                 else:
                     if self.gui_done:
                         self.text_area.config(state='normal')
+                        print('chaaaaaaaaaaaaat')
+                        print(msg)
                         self.text_area.insert('end', msg)
                         self.text_area.yview('end')
                         self.text_area.config(state='disabled')
