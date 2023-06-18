@@ -1,4 +1,4 @@
-import  pygame
+import pygame
 class MuteButton:
     def __init__(self, mute_image, unmute_image, pos):
         self.mute_image = mute_image

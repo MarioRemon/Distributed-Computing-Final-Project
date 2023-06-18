@@ -29,8 +29,6 @@ class Network:
         try:
             self.client.send(pickle.dumps('4:'))
             return pickle.loads(self.client.recv(2048))
-            #self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
-            #return self.client.recv(2048).decode()
         except socket.error as e:
             print("error")
             print(e)
@@ -39,8 +37,6 @@ class Network:
         try:
             self.client.send(pickle.dumps(str(data) + ':'))
             return pickle.loads(self.client.recv(2048))
-            #self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
-            #return self.client.recv(2048).decode()
         except socket.error as e:
             print("error")
             print(e)
@@ -59,11 +55,7 @@ class Network:
     def getUpdateMapComplete(self, mapComplete, score):
         try:
             self.client.send(pickle.dumps('2:' + str(mapComplete) + ':' + str(score)))  # + str(Pos)))
-            # print( pickle.loads(self.client.recv(2048)))
-            #print(pickle.loads(self.client.recv(2048)))
             return pickle.loads(self.client.recv(2048))
-            # self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
-            # return self.client.recv(2048).decode()
         except socket.error as e:
             print("error")
             print(e)
@@ -72,8 +64,6 @@ class Network:
         try:
             self.client.send(pickle.dumps('3:' + str(Pos)))
             return pickle.loads(self.client.recv(2048 * 16))
-            # self.client.send(str.encode(str(data))) #("Amirtyyyyyyyyyyy")) #make_pos(data)
-            # return self.client.recv(2048).decode()
         except socket.error as e:
             print("error")
             print(e)
@@ -81,7 +71,7 @@ class Network:
     def sendPlayerName(self, playerName):
         try:
             self.client.send(pickle.dumps('5:' + str(playerName)))
-            #return pickle.loads(self.client.recv(2048 * 16))
+            return pickle.loads(self.client.recv(2048))
         except socket.error as e:
             print("error")
             print(e)

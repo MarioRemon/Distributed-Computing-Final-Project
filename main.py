@@ -1,4 +1,5 @@
 from homePage import HomePage
 
 if __name__ == '__main__':
-    homePage = HomePage()
+    while True:
+        homePage = HomePage()

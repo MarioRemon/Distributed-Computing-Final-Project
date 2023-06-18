@@ -1,7 +1,5 @@
 import socket
 from _thread import *
-from player import Player
-
 import pickle
 from ip import *
 server = ip
@@ -20,7 +18,6 @@ numberOfPlayers = 0
 def threaded_client(conn):
     global numberOfPlayers
     numberOfPlayers += 1
-    #while True:
     try:
         if numberOfPlayers <= 8:
             carServerPort = 5555
@@ -31,7 +28,6 @@ def threaded_client(conn):
         if numberOfPlayers == 16:
             numberOfPlayers = 0
         conn.send(pickle.dumps([carServerPort, challengeServerPort]))
-        #conn.send(pickle.dumps([5555, 4444]))
     except:
         print('error')
 
@@ -41,5 +37,3 @@ while True:
     conn, addr = s.accept()
     print("Connected to:", addr)
     start_new_thread(threaded_client, (conn,))
-
-
