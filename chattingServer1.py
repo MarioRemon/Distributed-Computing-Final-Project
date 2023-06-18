@@ -1,6 +1,9 @@
-import socket
 import threading
+import socket
 from ip import *
+from pymongo.mongo_client import MongoClient
+import pickle
+
 
 IP = ip
 PORT = 3333
@@ -13,14 +16,76 @@ server.listen()
 clients = []
 usernames = []
 
+uri = ''
+primary = False
+replica1 = False
+replica2 = False
+
+# Send a ping to confirm a successful connection
+try:
+    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    primary = True
+except Exception as e:
+    primary = False
+try:
+    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    replica1 = True
+except Exception as e:
+    replica1 = False
+
+try:
+    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    replica2 = True
+except Exception as e:
+    replica2 = False
+
+if primary:  # primary db
+    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-146-206-9.compute-1.amazonaws.com'
+elif replica1:
+    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-52-54-148-14.compute-1.amazonaws.com'
+elif replica2:
+    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-152-143-87.compute-1.amazonaws.com'
+
+try:
+   client.admin.command('ping')
+   print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+   print(e)
+
+Message = ''
+count = 0
 def broadcast(msg):
-    for client in clients:
-        client.send(msg)
+    global Message
+    global count
+    global client
+    for cliento in clients:
+        cliento.sendall(pickle.dumps(msg))
+    Message += msg
+    count += 1
+    if count % 5 == 0:
+        try:
+            mydb = client['Car_Racing_Car']
+            data = mydb['game']
+            lastGame = data.find().sort([('time', -1)]).limit(1)
+            last_game = lastGame.next()
+            recordUpdate = {
+                'chatOfTheGame': Message,
+            }
+            data.update_many({'GameId': last_game['GameId']}, {"$set": recordUpdate})
+            count = 0
+            Message = ''
+        except:
+            print('error')
 def handle(client):
     while True:
         try:
-            msg = client.recv(1024)
-            print(f"{usernames[clients.index(client)]} says {msg}")
+            msg = pickle.loads(client.recv(2048))
             broadcast(msg)
         except:                                 #el client crashed aw maba2ash fi connection
             index = clients.index(client)
@@ -34,17 +99,13 @@ def handle(client):
 def receive():
     while True:
         client, address = server.accept()
-        print(f"connected with {str(address)}!")
-
-        client.send("NICK".encode('utf-8'))
-        username = client.recv(1024)
+        print('connected with'+str(address))
+        client.sendall(pickle.dumps('NICK'))
+        username = pickle.loads(client.recv(2048))
         usernames.append(username)
         clients.append(client)
-
-        print(f"Username of client {username}")
-        broadcast(f"user 1 connected to the server! \n" .encode('utf-8'))
-        client.send("Connected to the server".encode('utf-8'))
-
+        broadcast("A user connected to the server!")
+        client.sendall(pickle.dumps("Connected to the server"))
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 

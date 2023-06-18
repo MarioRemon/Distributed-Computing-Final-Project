@@ -1,16 +1,7 @@
-import socket
 import threading
-import pickle
-from ip import *
 import socket
-from _thread import *
-from bson import ObjectId
 from ip import *
-import mongo as mongo
-from player import Player
-from pymongo import *
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 import pickle
 
 
@@ -25,8 +16,42 @@ server.listen()
 clients = []
 usernames = []
 
-uri = "mongodb+srv://Mario:123@cluster0.msy4ut4.mongodb.net/?retryWrites=true&w=majority"
-client = MongoClient(uri, server_api=ServerApi('1'))
+uri = ''
+primary = False
+replica1 = False
+replica2 = False
+
+# Send a ping to confirm a successful connection
+try:
+    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    primary = True
+except Exception as e:
+    primary = False
+try:
+    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    replica1 = True
+except Exception as e:
+    replica1 = False
+
+try:
+    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    print(client.is_mongos)
+    replica2 = True
+except Exception as e:
+    replica2 = False
+
+if primary:  # primary db
+    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-146-206-9.compute-1.amazonaws.com'
+elif replica1:
+    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-52-54-148-14.compute-1.amazonaws.com'
+elif replica2:
+    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-152-143-87.compute-1.amazonaws.com'
+
 try:
    client.admin.command('ping')
    print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -40,9 +65,7 @@ def broadcast(msg):
     global count
     global client
     for cliento in clients:
-        #client.send(msg)
         cliento.sendall(pickle.dumps(msg))
-    print(msg)
     Message += msg
     count += 1
     if count % 5 == 0:
@@ -62,9 +85,7 @@ def broadcast(msg):
 def handle(client):
     while True:
         try:
-            #msg = client.recv(1024)
             msg = pickle.loads(client.recv(2048))
-            #print(usernames[clients.index(client)] + 'says'+ {msg})
             broadcast(msg)
         except:                                 #el client crashed aw maba2ash fi connection
             index = clients.index(client)
@@ -81,16 +102,11 @@ def receive():
         client, address = server.accept()
         print('connected with'+str(address))
         client.sendall(pickle.dumps('NICK'))
-        #client.send("NICK")#.encode('utf-8'))
-        #username = client.recv(1024)
         username = pickle.loads(client.recv(2048))
         usernames.append(username)
         clients.append(client)
 
-        #print(f"Username of client {username}")
-        #broadcast(f"user 1 connected to the server! \n" )#.encode('utf-8'))
         broadcast("A user connected to the server!")
-        #client.send("Connected to the server")#.encode('utf-8'))
         client.sendall(pickle.dumps("Connected to the server"))
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()

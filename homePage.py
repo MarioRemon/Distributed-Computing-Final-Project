@@ -4,7 +4,6 @@ from MuteButton import MuteButton
 import pygame
 from button import Button
 import sys
-from gameNetwork import GameNetwork
 
 #define colours
 bg = (204, 102, 0)
@@ -65,7 +64,7 @@ class HomePage:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
                         car.countdown(self.username)
-
+                        self.crashed = True
                     if self.QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                         pygame.quit()
                         sys.exit()
