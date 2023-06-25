@@ -1,7 +1,6 @@
 import random
-
 import pygame.sprite
-lan_pos = [205,285,370,450,525, 610 ,700,780]
+lan_pos = [205, 285, 370, 450, 525, 610, 700, 780]
 display_height = 700
 display_width = 800
 window = pygame.display.set_mode((display_width, display_height))
@@ -34,17 +33,6 @@ class FinishLine:
     def draw(self):
         window.blit(self.image, self.rect)
 
-# class FinishLine:
-#     def __init__(self, width, height):
-#         self.width = 570
-#         self.height = height
-#         self.x = (display_width - self.width) // 2
-#         self.y = 100
-#
-#     def draw(self):
-#         pygame.draw.rect(window, (255, 0, 0), (self.x, self.y, self.width+50, self.height))
-
-
 # Raindrop class
 class Raindrop:
     def __init__(self, x, y, speed):
@@ -66,7 +54,7 @@ class Pr(pygame.sprite.Sprite):
         dx = 0
         self.type = type
         if type == 1:
-            ctype =  random.randint(2,8)
+            ctype =  random.randint(2, 8)
             self.image = pygame.image.load(f'Img/cars/{ctype}.png')
             self.image = pygame.transform.flip(self.image,False,True)
             self.image = pygame.transform.scale(self.image,(70, 110))
