@@ -1,11 +1,10 @@
 import threading
 import socket
-from ip import *
 from pymongo.mongo_client import MongoClient
 import pickle
 
 
-IP = ip
+IP = 'ec2-13-48-24-217.eu-north-1.compute.amazonaws.com'
 PORT = 4444
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,41 +15,42 @@ server.listen()
 clients = []
 usernames = []
 
+
+#Send a ping to confirm a successful connection
 uri = ''
 primary = False
 replica1 = False
 replica2 = False
 
-# Send a ping to confirm a successful connection
+#Send a ping to confirm a successful connection
 try:
-    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-54-227-79-72.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     primary = True
 except Exception as e:
     primary = False
 try:
-    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-3-94-169-95.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     replica1 = True
 except Exception as e:
     replica1 = False
-
 try:
-    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-54-237-235-219.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     replica2 = True
 except Exception as e:
     replica2 = False
 
-if primary:  # primary db
-    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-54-146-206-9.compute-1.amazonaws.com'
+if primary:  #primary db
+    client = MongoClient('ec2-54-227-79-72.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-227-79-72.compute-1.amazonaws.com'
 elif replica1:
-    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-52-54-148-14.compute-1.amazonaws.com'
+    client = MongoClient('ec2-3-94-169-95.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-3-94-169-95.compute-1.amazonaws.com'
 elif replica2:
-    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-54-152-143-87.compute-1.amazonaws.com'
+    client = MongoClient('ec2-54-237-235-219.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-237-235-219.compute-1.amazonaws.com'
 
 try:
    client.admin.command('ping')

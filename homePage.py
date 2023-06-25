@@ -86,8 +86,6 @@ class HomePage:
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN and self.textbox_rect.collidepoint(MENU_MOUSE_POS):
-                        print(self.username)
-
                         pygame.key.stop_text_input()
                     elif event.key == pygame.K_BACKSPACE:
                         self.username = self.username[:-1]

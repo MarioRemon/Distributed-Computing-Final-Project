@@ -2,18 +2,16 @@ import socket
 import threading
 import tkinter
 import tkinter.scrolledtext
-from ip import *
 import pickle
 
-IP = ip
 PORT = 4444
 
 
 class Client:
     oldUser = False
-    def __init__(self,  port, userName):
+    def __init__(self,  port, userName, ip):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = IP
+        ip = ip
         self.sock.connect((ip, port))
         msg = tkinter.Tk()
         msg.withdraw()

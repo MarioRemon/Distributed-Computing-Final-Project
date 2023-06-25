@@ -4,8 +4,7 @@ from player import Player
 from pymongo import MongoClient
 import time
 import pickle
-from ip import *
-server = ip
+server = 'ec2-16-16-65-120.eu-north-1.compute.amazonaws.com'
 port = 9999
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,41 +16,43 @@ except socket.error as e:
 
 s.listen()
 print("Waiting for a connection, Server Started")
+
+# Send a ping to confirm a successful connection
 uri = ''
 primary = False
 replica1 = False
 replica2 = False
 
-# Send a ping to confirm a successful connection
+#Send a ping to confirm a successful connection
 try:
-    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-54-227-79-72.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     primary = True
 except Exception as e:
     primary = False
 try:
-    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-3-94-169-95.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     replica1 = True
 except Exception as e:
     replica1 = False
-
 try:
-    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
+    client = MongoClient('ec2-54-237-235-219.compute-1.amazonaws.com', 27017)
     print(client.is_mongos)
     replica2 = True
 except Exception as e:
     replica2 = False
 
-if primary:  # primary db
-    client = MongoClient('ec2-54-209-198-217.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-54-146-206-9.compute-1.amazonaws.com'
+if primary:  #primary db
+    client = MongoClient('ec2-54-227-79-72.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-227-79-72.compute-1.amazonaws.com'
 elif replica1:
-    client = MongoClient('ec2-52-54-148-14.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-52-54-148-14.compute-1.amazonaws.com'
+    client = MongoClient('ec2-3-94-169-95.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-3-94-169-95.compute-1.amazonaws.com'
 elif replica2:
-    client = MongoClient('ec2-54-152-143-87.compute-1.amazonaws.com', 27017)
-    uri = 'ec2-54-152-143-87.compute-1.amazonaws.com'
+    client = MongoClient('ec2-54-237-235-219.compute-1.amazonaws.com', 27017)
+    uri = 'ec2-54-237-235-219.compute-1.amazonaws.com'
+
 try:
    client.admin.command('ping')
    print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -61,11 +62,8 @@ except Exception as e:
 
 players = []
 numOfPlayers = 0
-rank = [[]]
 rankPlayers = []
-rankPlayers1 = []
 positionOfPlayers = []
-first3Rankers = []
 playersName = []
 activity = []
 def threaded_client(conn, playerId):
@@ -82,8 +80,6 @@ def threaded_client(conn, playerId):
     global numOfPlayers
     numOfPlayers += 1
     conn.send(pickle.dumps(players[playerId]))
-    reply = ""
-    reply1 = []
 
     try:
         mydb = client['Car_Racing_Car']
@@ -127,7 +123,6 @@ def threaded_client(conn, playerId):
                 }
                 data.insert_one(record)
         else:
-            print('No Previous Database')
             record = {
                 'GameId': 1,
                 'server': 2,  # if int(last_game['server']) == 1 else 2,
@@ -150,7 +145,6 @@ def threaded_client(conn, playerId):
     while True:
         try:
             data = pickle.loads(conn.recv(2048))
-            print('Data Received')
             dbTime += 1
 
             if not data:
@@ -178,8 +172,6 @@ def threaded_client(conn, playerId):
                     positionOfPlayers[playerId][0][1] = clientRequest[1]
                     player.position = clientRequest[1]
                     conn.send(pickle.dumps(positionOfPlayers))
-                    print("Received: ", data)
-                    print("Sending : ", reply1)
                 elif clientRequest[0] == '5':
                     playersName[playerId] = clientRequest[1]
                     player.userName = clientRequest[1]
@@ -202,7 +194,6 @@ def threaded_client(conn, playerId):
                                     # Check if the specific username exists in the player object
                                     if player.userName == onePlayer['userName']:
                                         # Perform any actions you want with the document
-                                        print("Found a document with the desired username :", game)
                                         found = True
                                         player.id = int(onePlayer['id'])
                                         player.position = onePlayer['position']
@@ -217,11 +208,9 @@ def threaded_client(conn, playerId):
                             mongoPlayers = g['players']
                             # Search for the specific username within the 'players' array
                             for onePlayer in mongoPlayers:
-                                print(onePlayer['userName'])
                                 # Check if the specific username exists in the player object
                                 if player.userName == onePlayer['userName']:
                                     # Perform any actions you want with the document
-                                    print("Found a document with the desired username:", g)
                                     # delete the new player created
                                     query = {
                                         '_id': (g['_id'])
@@ -292,7 +281,6 @@ def threaded_client(conn, playerId):
                        f"players.{player.id}.active": player.active}
               }
     data.update_one({"_id": last_game['_id']}, update)
-    print('passed')
 currentPlayer = 0
 while True:
     conn, addr = s.accept()

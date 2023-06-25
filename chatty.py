@@ -1,19 +1,17 @@
 import socket
 import threading
 import cargame
-from ip import *
 import pickle
 from cargame import *
-IP = ip
 PORT = 4444
 
 
 class Chat:
     oldUser = False
 
-    def __init__(self, userName):
+    def __init__(self, userName, ip):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip = IP
+        ip = ip
         self.userName = userName
         self.sock.connect((ip, PORT))
         self.running = True

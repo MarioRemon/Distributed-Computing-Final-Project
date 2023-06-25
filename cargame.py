@@ -1,8 +1,6 @@
-import pygame
 import time
 from chatty import Chat
 from obstacles import *
-import random
 from time import sleep
 from player import Player
 import re
@@ -20,7 +18,6 @@ grey = (211, 211, 211)
 clock = pygame.time.Clock()
 FPS = 10
 
-# chat_messages = []
 chat_messages = ''
 
 
@@ -296,7 +293,7 @@ class CarRacing:
     def chat_render(self):
         self.gameDisplay.blit(self.chat_image, (880, 0))
         # Set the maximum number of messages to display at once
-        max_messages = 12
+        # max_messages = 12
 
         # Calculate the starting index based on the chat_messages length
         # start_index = max(0, len(chat_messages) - max_messages)
@@ -325,7 +322,7 @@ class CarRacing:
     #gameloop
     def run_car(self, playerName):
         global received_a_message
-        chat = Chat(playerName)
+        chat = self.n.startChatty(playerName)
         self.player.id = self.network.getId()
         self.player.userName = playerName
 
